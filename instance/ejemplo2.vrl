@@ -1,0 +1,17 @@
+defmodule NumberTheory
+  using CoreLogic
+  
+  defspace Number end
+  defspace Nat < Number end
+  
+  defoperator plus : Nat -> Nat -> Nat [ commutative associative ] end
+  defrelation divides : Nat -> Nat -> Bool end
+  
+  defvar n : Nat, m : Nat, k : Nat end
+  
+  defrule ( divides n m ) -> ( exists k in Nat . m = ( n * k ) ) end
+  
+  defexpression 
+    ( forall n in Nat . ( n plus zero ) ≡ n )
+  end
+end

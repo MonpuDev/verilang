@@ -1,0 +1,17 @@
+defmodule GraphTheory
+  using SetTheory
+  
+  defspace Node end
+  defspace Path < Node end
+  
+  defoperator connect : Node -> Node -> Path [ directed ] end
+  defrelation pathExists : Node -> Node -> Bool end
+  
+  defvar a : Node, b : Node, c : Node end
+  
+  defrule ( pathExists a b and pathExists b c ) -> ( pathExists a c ) end
+  
+  defexpression
+    ( forall a in Node . ( exists b in Node . pathExists a b ) )
+  end
+end
