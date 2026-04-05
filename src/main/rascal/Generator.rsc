@@ -5,11 +5,13 @@ import IO;
 import String;
 import List;
 
-// ─── Función Principal de Generación ──────────────────────────────────────────
+
+//=================================================================
+//FUNCIÓN GENERACIÓN CODIGO
+//=================================================================
 public void generateTxt(Programa p, loc outputDir, str fileName) {
     str content = pp(p);
     
-    // Si la carpeta no existe, Rascal la crea automáticamente al escribir el archivo
     loc outputFile = outputDir + fileName;
     writeFile(outputFile, content);
     
@@ -19,12 +21,10 @@ public void generateTxt(Programa p, loc outputDir, str fileName) {
     println("==================================================");
 }
 
-// ─── Pretty Printers (Reglas de traducción) ───────────────────────────────────
 
 str pp(programa(Modulo m)) = pp(m);
 
 str pp(modulo(str name, list[Importacion] imports, list[Declaracion] decls)) {
-    // Intercalamos saltos de línea y tabulaciones para que quede bonito
     str imps = intercalate("\n", [ "  <pp(i)>" | i <- imports ]);
     str decs = intercalate("\n\n", [ "  <pp(d)>" | d <- decls ]);
     
