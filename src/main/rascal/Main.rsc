@@ -2,6 +2,7 @@ module Main
 
 import Syntax;
 import AST;
+import Generator;
 import ParseTree;
 import util::LanguageServer;
 import util::Reflective;
@@ -55,4 +56,14 @@ public void setupIDE() {
     
     println("¡Lenguaje VeriLang registrado exitosamente en VS Code!");
     println("Abre (o cierra y vuelve a abrir) tu archivo .vrl para ver el resaltado de sintaxis.");
+}
+
+
+//=================================================================
+//GENERACIÓN DE CÓDIGO
+//=================================================================
+public void compileVeriLang(loc inputFile, str outputFileName) {
+    AST::Programa p = getAST(inputFile);
+    // Le indicamos que genere el txt en la carpeta "output"
+    generateTxt(p, |cwd:///output/|, outputFileName);
 }
