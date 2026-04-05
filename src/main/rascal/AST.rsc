@@ -1,15 +1,19 @@
 module AST
 
-// ─── Programa y Módulo ────────────────────────────────────────────────────────
 
+//=================================================================
+//PROGRAMA Y MODULO
+//=================================================================
 data Programa = programa(Modulo modulo);
 
 data Modulo = modulo(str name, list[Importacion] imports, list[Declaracion] decls);
 
 data Importacion = importacion(str modName);
 
-// ─── Declaración ─────────────────────────────────────────────────────────────
 
+//=================================================================
+//DECLARACIÓN
+//=================================================================
 data Declaracion
   = declEspacio(DeclaracionEspacio s)
   | declOperador(DeclaracionOperador op)
@@ -17,8 +21,7 @@ data Declaracion
   | declRegla(DeclaracionRegla r)
   | declExpresion(DeclaracionExpresion e)
   | declRelacion(DeclaracionRelacion reln)
-  | declAtributos(DeclaracionAtributos a)
-  ;
+  | declAtributos(DeclaracionAtributos a);
 
 data DeclaracionEspacio
   = espacioSimple(str name)
@@ -45,15 +48,16 @@ data DeclaracionVariables = defVar(list[Variable] vars);
 
 data Variable = variable(str name, str domain);
 
-// La regla ahora usa Expresiones directas
 data DeclaracionRegla = defrule(Expresion lhs, Expresion rhs);
 
 data DeclaracionExpresion
   = defExpresionConAtr(Expresion expr, Atributos attrs)
   | defExpresion(Expresion expr);
 
-// ─── Expresión ───────────────────────────────────────────────────────────────
 
+//=================================================================
+//EXPRESIÓN
+//=================================================================
 data Expresion
   = ident(str name)
   | paren(Expresion e)
@@ -61,7 +65,7 @@ data Expresion
   | forallSimple(str var, Expresion body)
   | existsIn(str var, str domain, Expresion body)
   | existsSimple(str var, Expresion body)
-  | app(Expresion lhs, Expresion rhs) // <--- ¡La regla mágica que lo arregla todo!
+  | app(Expresion lhs, Expresion rhs)
   | exp(Expresion lhs, Expresion rhs)
   | mul(Expresion lhs, Expresion rhs)
   | div(Expresion lhs, Expresion rhs)
@@ -79,5 +83,4 @@ data Expresion
   | andOp(Expresion lhs, Expresion rhs)
   | orOp(Expresion lhs, Expresion rhs)
   | impl(Expresion lhs, Expresion rhs)
-  | implFat(Expresion lhs, Expresion rhs)
-  ;
+  | implFat(Expresion lhs, Expresion rhs);
