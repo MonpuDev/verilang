@@ -2,17 +2,11 @@ module AST
 
 // ─── Programa y Módulo ────────────────────────────────────────────────────────
 
-data Programa
-  = programa(Modulo modulo)
-  ;
+data Programa = programa(Modulo modulo);
 
-data Modulo
-  = modulo(str name, list[Importacion] imports, list[Declaracion] decls)
-  ;
+data Modulo = modulo(str name, list[Importacion] imports, list[Declaracion] decls);
 
-data Importacion
-  = importacion(str modName)
-  ;
+data Importacion = importacion(str modName);
 
 // ─── Declaración ─────────────────────────────────────────────────────────────
 
@@ -26,70 +20,48 @@ data Declaracion
   | declAtributos(DeclaracionAtributos a)
   ;
 
-// ─── Espacio ─────────────────────────────────────────────────────────────────
-
 data DeclaracionEspacio
   = espacioSimple(str name)
-  | espacioHerencia(str name, str parent)
-  ;
+  | espacioHerencia(str name, str parent);
 
-// ─── Operador / Relación ──────────────────────────────────────────────────────
-
-data FirmaOperador
-  = firma(list[str] tipos)
-  ;
+data FirmaOperador = firma(list[str] tipos);
 
 data DeclaracionOperador
-  = defOperador(str name, FirmaOperador firma)
-  ;
+  = defOperadorConAtr(str name, FirmaOperador firma, Atributos attrs)
+  | defOperador(str name, FirmaOperador firma);
 
-data DeclaracionRelacion
-  = defRelacion(str name, FirmaOperador firma)
-  ;
+data DeclaracionRelacion = defRelacion(str name, FirmaOperador firma);
 
-// ─── Atributos ───────────────────────────────────────────────────────────────
+data DeclaracionAtributos = declAtrs(Atributos attrs);
 
-data DeclaracionAtributos
-  = declAtrs(Atributos attrs)
-  ;
-
-data Atributos
-  = atributos(list[Atributo] items)
-  ;
+data Atributos = atributos(list[Atributo] items);
 
 data Atributo
   = atribSimple(str name)
   | atribValorado(str name, str val)
-  ;
+  | atribVacio(str name);
 
-// ─── Variables ───────────────────────────────────────────────────────────────
+data DeclaracionVariables = defVar(list[Variable] vars);
 
-data DeclaracionVariables
-  = defVar(list[Variable] vars)
-  ;
+data Variable = variable(str name, str domain);
 
-data Variable
-  = variable(str name, str domain)
-  ;
-
-// ─── Regla ───────────────────────────────────────────────────────────────────
-
-data DeclaracionRegla
-  = defrule(Aplicacion lhs, Aplicacion rhs)
-  ;
-
-// ─── Expresión ───────────────────────────────────────────────────────────────
+// La regla ahora usa Expresiones directas
+data DeclaracionRegla = defrule(Expresion lhs, Expresion rhs);
 
 data DeclaracionExpresion
-  = defExpresion(Expresion expr, list[Atributos] attrs)
-  ;
+  = defExpresionConAtr(Expresion expr, Atributos attrs)
+  | defExpresion(Expresion expr);
+
+// ─── Expresión ───────────────────────────────────────────────────────────────
 
 data Expresion
   = ident(str name)
   | paren(Expresion e)
-  | aplic(Aplicacion a)
-  | cuant(Cuantificador q)
-  | neg(Expresion e)
+  | forallIn(str var, str domain, Expresion body)
+  | forallSimple(str var, Expresion body)
+  | existsIn(str var, str domain, Expresion body)
+  | existsSimple(str var, Expresion body)
+  | app(Expresion lhs, Expresion rhs) // <--- ¡La regla mágica que lo arregla todo!
   | exp(Expresion lhs, Expresion rhs)
   | mul(Expresion lhs, Expresion rhs)
   | div(Expresion lhs, Expresion rhs)
@@ -108,22 +80,4 @@ data Expresion
   | orOp(Expresion lhs, Expresion rhs)
   | impl(Expresion lhs, Expresion rhs)
   | implFat(Expresion lhs, Expresion rhs)
-  ;
-
-data Cuantificador
-  = forallIn(str var, str domain, Expresion body)
-  | forallSimple(str var, Expresion body)
-  | existsIn(str var, str domain, Expresion body)
-  | existsSimple(str var, Expresion body)
-  ;
-
-// ─── Aplicación ──────────────────────────────────────────────────────────────
-
-data Aplicacion
-  = aplicacion(str op, list[Argumento] args)
-  ;
-
-data Argumento
-  = argId(str name)
-  | argAplic(Aplicacion inner)
   ;

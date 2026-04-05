@@ -5,34 +5,21 @@ extend lang::std::Layout;
 // ─── Palabras reservadas ──────────────────────────────────────────────────────
 
 keyword Reserved =
-  "defmodule" |
-  "using"       | "defspace"      | "defoperator"  |
+  "defmodule" | "using"       | "defspace"      | "defoperator"  |
   "defvar"    | "defrule"     | "defexpression" | "defrelation"  |
-  "end"       | "forall"      |
-  "exists"        | "in"           |
-  "and"       | "or"          |
-  "neg"
+  "end"       | "forall"      | "exists"        | "in"           |
+  "and"       | "or"
   ;
-
-// ─── Identificador ───────────────────────────────────────────────────────────
 
 lexical Id = ([a-zA-Z][a-zA-Z0-9\-]* !>> [a-zA-Z0-9\-]) \ Reserved;
 
-// ─── Símbolo inicial ──────────────────────────────────────────────────────────
-
 start syntax Programa = programa: Modulo modulo;
 
-// ─── Módulo ───────────────────────────────────────────────────────────────────
+// ─── Módulo y Declaraciones ───────────────────────────────────────────────────
 
-syntax Modulo
-  = modulo: "defmodule" Id name Importacion* imports Declaracion* decls "end"
-  ;
+syntax Modulo = modulo: "defmodule" Id name Importacion* imports Declaracion* decls "end";
 
-syntax Importacion
-  = importacion: "using" Id modName
-  ;
-
-// ─── Declaración ─────────────────────────────────────────────────────────────
+syntax Importacion = importacion: "using" Id modName;
 
 syntax Declaracion
   = declEspacio:    DeclaracionEspacio s
@@ -44,72 +31,44 @@ syntax Declaracion
   | declAtributos:  DeclaracionAtributos a
   ;
 
-// ─── Espacio ─────────────────────────────────────────────────────────────────
-
 syntax DeclaracionEspacio
   = espacioSimple:   "defspace" Id name "end"
-  | espacioHerencia: "defspace" Id name "\<" Id parent "end"
-  ;
-
-// ─── Operador ────────────────────────────────────────────────────────────────
+  | espacioHerencia: "defspace" Id name "\<" Id parent "end";
 
 syntax DeclaracionOperador
-  = defOperador: "defoperator" Id name ":" FirmaOperador firma "end"
-  ;
+  = defOperadorConAtr: "defoperator" Id name ":" FirmaOperador firma Atributos attrs "end"
+  | defOperador:       "defoperator" Id name ":" FirmaOperador firma "end";
 
-syntax FirmaOperador
-  = firma: {Id "-\>"}+  tipos
-  ;
+syntax FirmaOperador = firma: {Id "-\>"}+ tipos;
 
-// ─── Relación ────────────────────────────────────────────────────────────────
+syntax DeclaracionRelacion = defRelacion: "defrelation" Id name ":" FirmaOperador firma "end";
 
-syntax DeclaracionRelacion
-  = defRelacion: "defrelation" Id name ":" FirmaOperador firma "end"
-  ;
+syntax DeclaracionAtributos = declAtrs: Atributos attrs;
 
-// ─── Atributos ───────────────────────────────────────────────────────────────
-
-syntax DeclaracionAtributos
-  = declAtrs: Atributos attrs
-  ;
-
-syntax Atributos
-  = atributos: "[" Atributo+ items "]"
-  ;
+syntax Atributos = atributos: "[" Atributo+ items "]";
 
 syntax Atributo
   = atribSimple:   Id name
   | atribValorado: Id name ":" Id value
-  ;
+  | atribVacio:    Id name ":" "∅";
 
-// ─── Variables ───────────────────────────────────────────────────────────────
+syntax DeclaracionVariables = defVar: "defvar" {Variable ","}+ vars "end";
 
-syntax DeclaracionVariables
-  = defVar: "defvar" {Variable ","}+ vars "end"
-  ;
+syntax Variable = variable: Id name ":" Id domain;
 
-syntax Variable
-  = variable: Id name ":" Id domain
-  ;
-
-// ─── Regla ───────────────────────────────────────────────────────────────────
-
-syntax DeclaracionRegla
-  = defrule: "defrule" "(" Aplicacion lhs ")" "-\>" "(" Aplicacion rhs ")" "end"
-  ;
-
-// ─── Expresión ───────────────────────────────────────────────────────────────
+// Ahora la regla une dos expresiones cualquiera
+syntax DeclaracionRegla = defrule: "defrule" "(" Expresion lhs ")" "-\>" "(" Expresion rhs ")" "end";
 
 syntax DeclaracionExpresion
-  = defExpresion: "defexpression" Expresion expr Atributos? attrs "end"
-  ;
+  = defExpresionConAtr: "defexpression" Expresion expr Atributos attrs "end"
+  | defExpresion:       "defexpression" Expresion expr "end";
+
+// ─── Expresión ───────────────────────────────────────────────────────────────
 
 syntax Expresion
   = ident:  Id name
   | paren:  "(" Expresion e ")"
-  | aplic:  Aplicacion a
-  | cuant:  Cuantificador q
-  > neg: "neg" Expresion e
+  > left app: Expresion lhs Expresion rhs
   > right exp: Expresion lhs "**" Expresion rhs
   > left (
       mul: Expresion lhs "*" Expresion rhs
@@ -136,24 +95,11 @@ syntax Expresion
       impl:    Expresion lhs "-\>" Expresion rhs
     | implFat: Expresion lhs "=\>" Expresion rhs
   )
-  ;
-
-// ─── Cuantificadores ─────────────────────────────────────────────────────────
-
-syntax Cuantificador
-  = forallIn:     "forall" Id var "in" Id domain "." Expresion body
-  | forallSimple: "forall" Id var "."               Expresion body
-  | existsIn:     "exists" Id var "in" Id domain "." Expresion body
-  | existsSimple: "exists" Id var "."               Expresion body
-  ;
-
-// ─── Aplicación ──────────────────────────────────────────────────────────────
-
-syntax Aplicacion
-  = aplicacion: Id op Argumento+ args
-  ;
-
-syntax Argumento
-  = argId:    Id name
-  | argAplic: "(" Aplicacion inner ")"
+  // ¡Aquí definimos los cuantificadores directamente!
+  > right (
+      forallIn:     "forall" Id var "in" Id domain "." Expresion body
+    | forallSimple: "forall" Id var "."               Expresion body
+    | existsIn:     "exists" Id var "in" Id domain "." Expresion body
+    | existsSimple: "exists" Id var "."               Expresion body
+  )
   ;
