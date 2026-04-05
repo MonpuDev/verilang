@@ -7,8 +7,10 @@ import util::LanguageServer;
 import util::Reflective;
 import IO;
 
-// ─── 1. Funciones de Parseo (Texto -> Árbol de Sintaxis) ─────────────────────
 
+//=================================================================
+//FUNCIÓN DE PARSEO
+//=================================================================
 public Syntax::Programa parseVeriLang(loc file) {
     return parse(#Syntax::Programa, file);
 }
@@ -17,31 +19,37 @@ public Syntax::Programa parseVeriLangString(str src, loc origin) {
     return parse(#Syntax::Programa, src, origin);
 }
 
-// ─── 2. Funciones de AST (Árbol de Sintaxis -> Árbol Abstracto) ──────────────
 
+//=================================================================
+//FUNCIÓN DE 'AST'
+//=================================================================
 public AST::Programa getAST(loc file) {
     Tree pt = parseVeriLang(file);
     return implode(#AST::Programa, pt);
 }
 
-// ─── 3. Integración con el IDE de VS Code (Resaltado de Sintaxis) ────────────
 
-// Definimos los servicios (Quitamos el "parser = ")
+//=================================================================
+//RESALTADO DE SINTAXIS
+//=================================================================
 set[LanguageService] veriLangContributions() = {
     parsing(Tree (str input, loc origin) {
         return parseVeriLangString(input, origin);
     })
 };
 
-// Registramos el lenguaje
+
+//=================================================================
+//REGISTRAR EL LENGUAJE
+//=================================================================
 public void setupIDE() {
     registerLanguage(
         language(
             pathConfig(srcs=[|project://VeriLang/src/main/rascal|]),
-            "VeriLang",             // Nombre del lenguaje
-            {"vrl"},                // <-- ¡CORRECCIÓN! Ahora es un SET de extensiones
-            "Main",                 // Módulo donde están las contribuciones
-            "veriLangContributions" // Función que devuelve los servicios
+            "VeriLang",
+            {"vrl"},
+            "Main",
+            "veriLangContributions"
         )
     );
     
